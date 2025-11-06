@@ -419,6 +419,11 @@
                         <h4 class="bottom-20">Default frequency</h4>
                         <%- include('_components', {component: 'checkbox', cssClass: '', label: 'Default frequency for first client', id: 'enableDefaultFreq'}) %><br>
                         <%- include('_components', {component: 'text', cssClass: 'w-100', placeholder: '87.5', label: 'Default frequency', id: 'defaultFreq'}) %>
+
+                        <hr>
+                        <h4 class="bottom-20">Firmware Settings</h4>
+                        <%- include('_components', {component: 'checkbox', cssClass: '', label: 'Respect firmware settings (use EEPROM)', id: 'respectFirmwareSettings'}) %><br>
+                        <p class="text-gray">When enabled, the server will not override tuner settings on connection. The firmware will use its EEPROM saved settings.</p>
                     </div>
                     <div class="panel-50 p-bottom-20">
                         <h3>Miscellaneous</h3>

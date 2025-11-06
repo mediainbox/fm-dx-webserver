@@ -163,6 +163,13 @@ if (serverConfig.xdrd.wirelessConnection === false) {
     }, 3000);
     
     setTimeout(() => {
+      // If respectFirmwareSettings is true, skip initialization - let firmware use its EEPROM state
+      if (serverConfig.respectFirmwareSettings === true) {
+        dataHandler.state.isSerialportRetrying = false;
+        return;
+      }
+
+      // Default behavior: send initialization commands
       serialport.write('Q0\n');
       serialport.write('M0\n');
       serialport.write(`Z${serverConfig.antennaStartup}\n`); // Antenna on startup
@@ -171,11 +178,10 @@ if (serverConfig.xdrd.wirelessConnection === false) {
         serialport.write('T' + Math.round(serverConfig.defaultFreq * 1000) + '\n');
         dataHandler.initialData.freq = Number(serverConfig.defaultFreq).toFixed(3);
         dataHandler.dataToSend.freq = Number(serverConfig.defaultFreq).toFixed(3);
-      } else if (dataHandler.state.lastFrequencyAlive && dataHandler.state.isSerialportRetrying) { // Serialport retry code when port is open but communication is lost
+      } else if (dataHandler.state.lastFrequencyAlive && dataHandler.state.isSerialportRetrying) {
         serialport.write('T' + (dataHandler.state.lastFrequencyAlive * 1000) + '\n');
-      } else {
-        serialport.write('T87500\n');
       }
+      // If enableDefaultFreq is false and not retrying, don't send any frequency command - preserve hardware's current frequency
       dataHandler.state.isSerialportRetrying = false;
 
       serialport.write('A0\n');
@@ -196,12 +202,13 @@ if (serverConfig.xdrd.wirelessConnection === false) {
       if (serverConfig.stereoStartup === "1") {
         serialport.write("B1\n"); // Mono
       }
-      serverConfig.audio.startupVolume 
-        ? serialport.write('Y' + (serverConfig.audio.startupVolume * 100).toFixed(0) + '\n') 
+      serverConfig.audio.startupVolume
+        ? serialport.write('Y' + (serverConfig.audio.startupVolume * 100).toFixed(0) + '\n')
         : serialport.write('Y100\n');
     }, 6000);
     
     serialport.on('data', (data) => {
+      logDebug('Serial data received: ' + data.toString().replace(/\n/g, '\\n'));
       helpers.resolveDataBuffer(data, wss, rdsWss);
     });
 
@@ -286,9 +293,19 @@ client.on('data', (data) => {
 
       if (authFlags.authMsg === true && authFlags.firstClient === true) {
         client.write('x\n');
-        client.write(serverConfig.defaultFreq && serverConfig.enableDefaultFreq === true ? 'T' + Math.round(serverConfig.defaultFreq * 1000) + '\n' : 'T87500\n');
-        dataHandler.initialData.freq = serverConfig.defaultFreq && serverConfig.enableDefaultFreq === true ? Number(serverConfig.defaultFreq).toFixed(3) : (87.5).toFixed(3);
-        dataHandler.dataToSend.freq = serverConfig.defaultFreq && serverConfig.enableDefaultFreq === true ? Number(serverConfig.defaultFreq).toFixed(3) : (87.5).toFixed(3);
+
+        // If respectFirmwareSettings is true, skip initialization - let firmware use its EEPROM state
+        if (serverConfig.respectFirmwareSettings === true) {
+          return;
+        }
+
+        // Default behavior: send initialization commands
+        if (serverConfig.defaultFreq && serverConfig.enableDefaultFreq === true) {
+          client.write('T' + Math.round(serverConfig.defaultFreq * 1000) + '\n');
+          dataHandler.initialData.freq = Number(serverConfig.defaultFreq).toFixed(3);
+          dataHandler.dataToSend.freq = Number(serverConfig.defaultFreq).toFixed(3);
+        }
+        // If enableDefaultFreq is false, don't send any frequency command - preserve hardware's current frequency
         client.write('A0\n');
         client.write(serverConfig.audio.startupVolume ? 'Y' + (serverConfig.audio.startupVolume * 100).toFixed(0) + '\n' : 'Y100\n');
         serverConfig.webserver.rdsMode ? client.write('D1\n') : client.write('D0\n');
@@ -556,7 +573,7 @@ wss.on('connection', (ws, request) => {
             serverConfig.publicTuner = true;
         }
 
-        if (currentUsers === 0 && serverConfig.enableDefaultFreq === true && 
+        if (currentUsers === 0 && serverConfig.enableDefaultFreq === true &&
             serverConfig.autoShutdown !== true && serverConfig.xdrd.wirelessConnection === true) {
             setTimeout(function() {
                 if (currentUsers === 0) {

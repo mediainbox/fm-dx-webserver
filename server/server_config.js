@@ -106,6 +106,7 @@ let serverConfig = {
   lockToAdmin: false,
   autoShutdown: false,
   enableDefaultFreq: false,
+  respectFirmwareSettings: false,
   defaultFreq: "87.5",
   bwSwitch: false,
   bwAutoStartup: "0",

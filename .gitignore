@@ -1,6 +1,7 @@
 node_modules/
 /*.json
 /serverlog.txt
+/debug_output.log
 /web/js/plugins/
 /libraries/**
 /plugins/*
