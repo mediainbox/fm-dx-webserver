@@ -783,7 +783,7 @@ app.use(express.static(path.join(__dirname, '../web'))); // Serve the entire web
 fmdxList.update();
 
 helpers.checkIPv6Support((isIPv6Supported) => {
-  const ipv4Address = serverConfig.webserver.webserverIp === '0.0.0.0' ? 'localhost' : serverConfig.webserver.webserverIp;
+  const ipv4Address = serverConfig.webserver.webserverIp === '0.0.0.0' : serverConfig.webserver.webserverIp;
   const ipv6Address = '::'; // This will bind to all available IPv6 interfaces
   const port = serverConfig.webserver.webserverPort;
 
