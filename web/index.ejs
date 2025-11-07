@@ -233,6 +233,11 @@
                   <% if (device == 'tef') { %><button style="border-radius: 0px 15px 15px 0px;" class="data-ims hide-phone tooltip" aria-label="iMS + Filter" data-tooltip="<strong>The iMS filter reduces multipath audio artifacts.</strong><br><br>It's recommended to leave it on most of the time."><span class="text-bold">iMS</span></button><% } %>
                   <% if (device == 'xdr') { %><button style="border-radius: 0px 15px 15px 0px;" class="data-ims hide-phone tooltip" aria-label="IF+ Filter" data-tooltip="<strong>The IF+ filter increases gain by 6dB</strong>"><span class="text-bold">IF+</span></button><% } %>
                 </div>
+                <% if (device == 'tef') { %>
+                <div class="panel-50 no-bg br-0 h-100 m-0 button-led">
+                  <button id="led-toggle" style="border-radius: 15px;margin-left: 15px;" class="hide-phone tooltip" aria-label="LED Control" data-tooltip="<strong>Toggle RED LED</strong><br><br>Host-controlled indicator LED"><span class="text-bold">LED</span></button>
+                </div>
+                <% } %>
               </div>
             </div>
 

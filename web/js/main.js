@@ -197,7 +197,15 @@ $(document).ready(function () {
     $(".data-ims").click(function () {
         toggleButtonState("ims");
     });
-    
+
+    $("#led-toggle").click(function () {
+        toggleLED();
+    });
+
+    // Initialize LED button state to OFF
+    parsedData.led = 0;
+    updateButtonState("led-toggle", 0);
+
     $("#volumeSlider").on('mouseup', function() {
         $('#volumeSlider').blur();
     })
@@ -422,8 +430,11 @@ function handleWebSocketMessage(event) {
         return;
     }
     
+    // Preserve LED state across firmware data updates
+    var ledState = parsedData ? parsedData.led : 0;
     parsedData = JSON.parse(event.data);
-    
+    parsedData.led = ledState;
+
     resetDataTimeout();
     updatePanels(parsedData);
     
@@ -635,8 +646,11 @@ socket.onmessage = (event) => {
         return;
     }
     
+    // Preserve LED state across firmware data updates
+    var ledState = parsedData ? parsedData.led : 0;
     parsedData = JSON.parse(event.data);
-    
+    parsedData.led = ledState;
+
     resetDataTimeout();
     updatePanels(parsedData);
     
@@ -1148,6 +1162,24 @@ function toggleForcedStereo() {
     var message = "B";
     message += parsedData.stForced = (parsedData.stForced == "1") ? "0" : "1";
     socket.send(message);
+}
+
+function toggleLED() {
+    // Initialize LED state if undefined (defaults to OFF)
+    if (typeof parsedData.led === 'undefined') {
+        parsedData.led = 0;
+    }
+
+    // Toggle LED state
+    parsedData.led = parsedData.led ? 0 : 1;
+
+    // Update button visual state
+    updateButtonState("led-toggle", parsedData.led);
+
+    // Send command to tuner
+    const command = "L" + parsedData.led;
+    console.log("LED toggle: sending " + command + " (state: " + parsedData.led + ")");
+    socket.send(command);
 }
 
 function toggleLock(buttonSelector, activeMessage, inactiveMessage, activeLabel, inactiveLabel) {
