@@ -1,5 +1,7 @@
 # FM-DX Webserver 📻🌐
 
+> **Fork Notice:** This is a modified version of [NoobishSVK/fm-dx-webserver](https://github.com/NoobishSVK/fm-dx-webserver). See [CHANGELOG.md](CHANGELOG.md) for details.
+
 FM-DX Webserver is a cross-platform web server designed for FM DXers who want to control their radio receiver through a web interface.
 
 # Officially supported devices
